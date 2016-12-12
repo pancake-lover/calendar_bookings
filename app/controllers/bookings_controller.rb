@@ -8,7 +8,7 @@ class BookingsController < ApplicationController
     if conflicting_bookings
       render json: { message: 'Booking conflicts with an existing booking' }, status: :unprocessable_entity
     else
-      room.bookings.create(start: start_date, end: end_date)
+      room.bookings.create(booking_params)
       render json: { message: 'Booking created.' }, status: :ok
     end
   end
