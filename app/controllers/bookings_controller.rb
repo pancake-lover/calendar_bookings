@@ -1,10 +1,13 @@
 class BookingsController < ApplicationController
   def create
     room = Room.find(params[:room_id])
-    start_date = Date.parse(params[:start])
-    end_date = Date.parse(params[:end])
-    conflicting_bookings = room.bookings.where(start: start_date..end_date)
-      .or(room.bookings.where(end: start_date..end_date)).any?
+    dates = get_dates(params[:start], params[:end])
+    if dates
+      dates = Range.new(*dates)
+    else
+      return render json: { message: 'Wrong dates parameters passed' }, status: :unprocessable_entity
+    end
+    conflicting_bookings = room.bookings.where(start: dates).or(room.bookings.where(end: dates)).any?
     if conflicting_bookings
       render json: { message: 'Booking conflicts with an existing booking' }, status: :unprocessable_entity
     else
@@ -17,5 +20,11 @@ class BookingsController < ApplicationController
 
   def booking_params
     params.permit(:start, :end, :room_id)
+  end
+
+  def get_dates(from, to)
+    start_date = (Date.parse(from) rescue return nil)
+    end_date = (Date.parse(to) rescue return nil)
+    [start_date, end_date] if start_date <= end_date
   end
 end
