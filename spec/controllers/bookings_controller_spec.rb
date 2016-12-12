@@ -14,6 +14,12 @@ RSpec.describe BookingsController, type: :controller do
       expect(response.status).to eq(422)
     end
 
+    it "doesn't book a nonexisting room" do
+      room = FactoryGirl.create(:room)
+      post :create, params: { room_id: room.id+1, start: Date.today, end: Date.tomorrow }
+      expect(response.status).to eq(404)
+    end
+
     it "books a room if it hasn't any other bookings" do
       room = FactoryGirl.create(:room)
       post :create, params: { room_id: room.id, start: Date.today, end: Date.tomorrow }

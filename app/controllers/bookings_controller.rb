@@ -1,4 +1,6 @@
 class BookingsController < ApplicationController
+  rescue_from ActiveRecord::RecordNotFound, with: :room_not_found
+
   def create
     room = Room.find(params[:room_id])
     dates = get_dates(params[:start], params[:end])
@@ -26,5 +28,9 @@ class BookingsController < ApplicationController
     start_date = (Date.parse(from) rescue return nil)
     end_date = (Date.parse(to) rescue return nil)
     [start_date, end_date] if start_date <= end_date
+  end
+
+  def room_not_found
+    render json: { message: 'Wrong room id passed' }, status: :not_found
   end
 end
